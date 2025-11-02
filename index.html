@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Research Dashboard</title>
+  <style>
+    * { 
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      /* Light theme (default) */
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-light: #dbeafe;
+      --border: #e5e7eb;
+      --border-hover: #3b82f6;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --shadow-hover: rgba(59, 130, 246, 0.15);
+    }
+    
+    [data-theme="dark"] {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1a1f2e;
+      --bg-card: #1e2433;
+      --text-primary: #e4e6eb;
+      --text-secondary: #b0b8c4;
+      --text-muted: #8b95a5;
+      --accent: #60a5fa;
+      --accent-hover: #93c5fd;
+      --accent-light: rgba(96, 165, 250, 0.15);
+      --border: #2d3748;
+      --border-hover: #60a5fa;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --shadow-hover: rgba(96, 165, 250, 0.2);
+    }
+    
+    body { 
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    /* Header Styles */
+    header {
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px var(--shadow);
+      transition: all 0.3s ease;
+    }
+    
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 24px;
+    }
+    
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    h1 .emoji {
+      font-size: 28px;
+    }
+    
+    .theme-toggle {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 8px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+    
+    .theme-toggle:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .quick-btn {
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px var(--shadow);
+    }
+    
+    .quick-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-hover);
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    
+    /* Section Styles */
+    .section {
+      margin-bottom: 48px;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .section-header .icon {
+      font-size: 28px;
+      filter: grayscale(0.3);
+    }
+    
+    .section-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    
+    .grid-large {
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    }
+    
+    /* Card Styles */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 8px 24px var(--shadow-hover);
+      transform: translateY(-4px);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .card:hover::before {
+      opacity: 1;
+    }
+    
+    .featured-card {
+      border: 2px solid var(--accent);
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--accent-light) 100%);
+    }
+    
+    .featured-card::after {
+      content: '⭐';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 24px;
+      opacity: 0.6;
+    }
+    
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.3;
+    }
+    
+    .card-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    /* Links */
+    .link-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    
+    .resource-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+    }
+    
+    .resource-link:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      transform: translateX(4px);
+      color: var(--accent-hover);
+    }
+    
+    .resource-link::before {
+      content: '→';
+      font-size: 18px;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+    
+    .resource-link:hover::before {
+      transform: translateX(4px);
+    }
+    
+    .badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: white;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Tags */
+    .tag-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    
+    .tag {
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--accent);
+    }
+    
+    /* Note/Tip Box */
+    .note {
+      background: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 24px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .note strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    /* Loading Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+    .card:nth-child(4) { animation-delay: 0.2s; }
+    .card:nth-child(5) { animation-delay: 0.25s; }
+    .card:nth-child(6) { animation-delay: 0.3s; }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .grid, .grid-large {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 22px;
+      }
+      
+      .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      
+      .quick-actions {
+        width: 100%;
+      }
+      
+      .quick-btn {
+        flex: 1;
+        justify-content: center;
+      }
+      
+      .container {
+        padding: 24px 16px;
+      }
+    }
+    
+    /* Scroll Progress Bar */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+      z-index: 101;
+      transition: width 0.1s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+  
+  <header>
+    <div class="header-content">
+      <div class="header-top">
+        <h1>
+          <span class="emoji">🔬</span>
+          AI Research Dashboard
+        </h1>
+        <button class="theme-toggle" id="themeToggle">
+          <span id="themeIcon">🌙</span>
+          <span id="themeText">Dark Mode</span>
+        </button>
+      </div>
+      
+      <p class="subtitle">
+        Looking for New AI Research Papers!!
+      </p>
+      
+      <div class="quick-actions">
+        <a href="https://arxiv.org/list/cs.AI/recent" class="quick-btn" target="_blank">
+          📄 Latest arXiv
+        </a>
+        <a href="https://paperswithcode.com/greatest" class="quick-btn" target="_blank">
+          ⭐ Trending Papers
+        </a>
+        <a href="https://huggingface.co/papers" class="quick-btn" target="_blank">
+          🤗 Daily Papers
+        </a>
+        <a href="https://github.com/trending/python?since=daily" class="quick-btn" target="_blank">
+          🔥 GitHub Trending
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- ARXIV PREPRINTS -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">📄</span>
+        <h2>arXiv Preprints</h2>
+      </div>
+      <div class="grid">
+        <div class="card featured-card">
+          <h3 class="card-title">🤖 Artificial Intelligence</h3>
+          <p class="card-desc">General AI research, reasoning, planning, and knowledge representation</p>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/cs.AI/recent" class="resource-link" target="_blank">
+              Recent Submissions <span class="badge">New</span>
+            </a>
+            <a href="https://arxiv.org/list/cs.AI/new" class="resource-link" target="_blank">
+              New This Week
+            </a>
+          </div>
+        </div>
+
+        <div class="card featured-card">
+          <h3 class="card-title">🧠 Machine Learning</h3>
+          <p class="card-desc">Deep learning, neural networks, optimization, and theory</p>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/cs.LG/recent" class="resource-link" target="_blank">
+              Recent Submissions <span class="badge">New</span>
+            </a>
+            <a href="https://arxiv.org/list/cs.LG/new" class="resource-link" target="_blank">
+              New This Week
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">👁️ Computer Vision</h3>
+          <p class="card-desc">Image recognition, object detection, segmentation, and diffusion models</p>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/cs.CV/recent" class="resource-link" target="_blank">
+              Recent Submissions
+            </a>
+            <a href="https://arxiv.org/list/cs.CV/new" class="resource-link" target="_blank">
+              New This Week
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">💬 Natural Language Processing</h3>
+          <p class="card-desc">LLMs, transformers, language understanding, and generation</p>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/cs.CL/recent" class="resource-link" target="_blank">
+              Recent Submissions
+            </a>
+            <a href="https://arxiv.org/list/cs.CL/new" class="resource-link" target="_blank">
+              New This Week
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🤝 Multimodal & HCI</h3>
+          <p class="card-desc">Vision-language models and human-computer interaction</p>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/cs.HC/recent" class="resource-link" target="_blank">
+              Recent Submissions
+            </a>
+            <a href="https://arxiv.org/list/cs.MM/recent" class="resource-link" target="_blank">
+              Multimedia (cs.MM)
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🦾 Robotics</h3>
+          <p class="card-desc">Robot learning, embodied AI, manipulation, and navigation</p>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/cs.RO/recent" class="resource-link" target="_blank">
+              Recent Submissions
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAPERS WITH CODE -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">⭐</span>
+        <h2>Papers With Code</h2>
+      </div>
+      <div class="grid">
+        <div class="card featured-card">
+          <h3 class="card-title">🔥 Trending Papers</h3>
+          <p class="card-desc">Most popular papers with code implementations</p>
+          <div class="link-group">
+            <a href="https://paperswithcode.com/greatest" class="resource-link" target="_blank">
+              Greatest Papers (All Time)
+            </a>
+            <a href="https://paperswithcode.com/" class="resource-link" target="_blank">
+              Browse All Papers
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🆕 Latest Releases</h3>
+          <p class="card-desc">Most recent papers with implementations</p>
+          <div class="link-group">
+            <a href="https://paperswithcode.com/latest" class="resource-link" target="_blank">
+              Latest Papers
+            </a>
+            <a href="https://paperswithcode.com/sota" class="resource-link" target="_blank">
+              State-of-the-Art Results
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">📊 Benchmarks & Leaderboards</h3>
+          <p class="card-desc">Compare model performance across tasks</p>
+          <div class="link-group">
+            <a href="https://paperswithcode.com/sota" class="resource-link" target="_blank">
+              All Benchmarks
+            </a>
+            <a href="https://paperswithcode.com/methods" class="resource-link" target="_blank">
+              Methods & Techniques
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INDUSTRY RESEARCH -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">🏢</span>
+        <h2>Industry Research Labs</h2>
+      </div>
+      <div class="grid grid-large">
+        <div class="card featured-card">
+          <h3 class="card-title">🔬 Google Research & DeepMind</h3>
+          <p class="card-desc">Leading AI research from Google's labs</p>
+          <div class="link-group">
+            <a href="https://blog.research.google/" class="resource-link" target="_blank">
+              Google Research Blog
+            </a>
+            <a href="https://deepmind.google/research/" class="resource-link" target="_blank">
+              DeepMind Publications
+            </a>
+            <a href="https://research.google/pubs/" class="resource-link" target="_blank">
+              All Google Publications
+            </a>
+          </div>
+          <div class="tag-list">
+            <span class="tag">Gemini</span>
+            <span class="tag">AlphaFold</span>
+            <span class="tag">Transformers</span>
+          </div>
+        </div>
+
+        <div class="card featured-card">
+          <h3 class="card-title">🧪 OpenAI</h3>
+          <p class="card-desc">GPT models and advanced AI research</p>
+          <div class="link-group">
+            <a href="https://openai.com/research" class="resource-link" target="_blank">
+              Research Publications
+            </a>
+            <a href="https://openai.com/news/research" class="resource-link" target="_blank">
+              Research News
+            </a>
+          </div>
+          <div class="tag-list">
+            <span class="tag">GPT-4</span>
+            <span class="tag">DALL-E</span>
+            <span class="tag">Whisper</span>
+          </div>
+        </div>
+
+        <div class="card featured-card">
+          <h3 class="card-title">🔷 Anthropic</h3>
+          <p class="card-desc">AI safety and Claude research</p>
+          <div class="link-group">
+            <a href="https://www.anthropic.com/research" class="resource-link" target="_blank">
+              Research Publications
+            </a>
+            <a href="https://www.anthropic.com/news" class="resource-link" target="_blank">
+              News & Updates
+            </a>
+          </div>
+          <div class="tag-list">
+            <span class="tag">Claude</span>
+            <span class="tag">AI Safety</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🔵 Meta AI</h3>
+          <p class="card-desc">LLaMA, computer vision, and FAIR research</p>
+          <div class="link-group">
+            <a href="https://ai.meta.com/research/" class="resource-link" target="_blank">
+              Research Publications
+            </a>
+            <a href="https://ai.meta.com/blog/" class="resource-link" target="_blank">
+              AI Blog
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🪟 Microsoft Research</h3>
+          <p class="card-desc">AI research across multiple domains</p>
+          <div class="link-group">
+            <a href="https://www.microsoft.com/en-us/research/research-area/artificial-intelligence/" class="resource-link" target="_blank">
+              AI Research Area
+            </a>
+            <a href="https://www.microsoft.com/en-us/research/blog/" class="resource-link" target="_blank">
+              Research Blog
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🟢 NVIDIA Research</h3>
+          <p class="card-desc">GPU-accelerated AI and simulation</p>
+          <div class="link-group">
+            <a href="https://www.nvidia.com/en-us/research/" class="resource-link" target="_blank">
+              Research Homepage
+            </a>
+            <a href="https://developer.nvidia.com/blog/" class="resource-link" target="_blank">
+              Developer Blog
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🍎 Apple Machine Learning</h3>
+          <p class="card-desc">On-device AI and privacy-focused ML</p>
+          <div class="link-group">
+            <a href="https://machinelearning.apple.com/" class="resource-link" target="_blank">
+              ML Research Journal
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">📦 Amazon Science</h3>
+          <p class="card-desc">AWS AI services and Alexa research</p>
+          <div class="link-group">
+            <a href="https://www.amazon.science/latest-news" class="resource-link" target="_blank">
+              Latest News
+            </a>
+            <a href="https://www.amazon.science/publications" class="resource-link" target="_blank">
+              Publications
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODELS & CODE -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">🤗</span>
+        <h2>Models & Code</h2>
+      </div>
+      <div class="grid">
+        <div class="card featured-card">
+          <h3 class="card-title">🤗 Hugging Face Hub</h3>
+          <p class="card-desc">Largest collection of ML models and datasets</p>
+          <div class="link-group">
+            <a href="https://huggingface.co/models?sort=trending" class="resource-link" target="_blank">
+              Trending Models <span class="badge">Hot</span>
+            </a>
+            <a href="https://huggingface.co/datasets?sort=trending" class="resource-link" target="_blank">
+              Trending Datasets
+            </a>
+            <a href="https://huggingface.co/papers" class="resource-link" target="_blank">
+              Daily Papers
+            </a>
+            <a href="https://huggingface.co/spaces" class="resource-link" target="_blank">
+              Demo Spaces
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">💻 GitHub Trending</h3>
+          <p class="card-desc">Most starred repositories</p>
+          <div class="link-group">
+            <a href="https://github.com/trending/python?since=daily&spoken_language_code=en" class="resource-link" target="_blank">
+              Python (Daily)
+            </a>
+            <a href="https://github.com/trending/jupyter-notebook?since=daily" class="resource-link" target="_blank">
+              Jupyter Notebooks
+            </a>
+            <a href="https://github.com/trending?since=daily" class="resource-link" target="_blank">
+              All Languages
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🎯 Model Collections</h3>
+          <p class="card-desc">Curated model repositories</p>
+          <div class="link-group">
+            <a href="https://replicate.com/explore" class="resource-link" target="_blank">
+              Replicate Models
+            </a>
+            <a href="https://github.com/eugeneyan/open-llms" class="resource-link" target="_blank">
+              Open LLMs List
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFERENCES -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">🎓</span>
+        <h2>Top Conferences</h2>
+      </div>
+      <div class="grid grid-large">
+        <div class="card">
+          <h3 class="card-title">🏆 Core ML Conferences</h3>
+          <p class="card-desc">The most prestigious machine learning venues</p>
+          <div class="link-group">
+            <a href="https://neurips.cc/" class="resource-link" target="_blank">
+              NeurIPS
+            </a>
+            <a href="https://icml.cc/" class="resource-link" target="_blank">
+              ICML
+            </a>
+            <a href="https://iclr.cc/" class="resource-link" target="_blank">
+              ICLR
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">👁️ Computer Vision</h3>
+          <p class="card-desc">Leading computer vision conferences</p>
+          <div class="link-group">
+            <a href="https://cvpr.thecvf.com/" class="resource-link" target="_blank">
+              CVPR
+            </a>
+            <a href="https://iccv2023.thecvf.com/" class="resource-link" target="_blank">
+              ICCV
+            </a>
+            <a href="https://eccv2024.ecva.net/" class="resource-link" target="_blank">
+              ECCV
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">💬 NLP & Language</h3>
+          <p class="card-desc">Natural language processing conferences</p>
+          <div class="link-group">
+            <a href="https://2024.aclweb.org/" class="resource-link" target="_blank">
+              ACL
+            </a>
+            <a href="https://2024.emnlp.org/" class="resource-link" target="_blank">
+              EMNLP
+            </a>
+            <a href="https://2024.naacl.org/" class="resource-link" target="_blank">
+              NAACL
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🌐 General AI</h3>
+          <p class="card-desc">Broad AI research venues</p>
+          <div class="link-group">
+            <a href="https://aaai.org/conference/aaai/" class="resource-link" target="_blank">
+              AAAI
+            </a>
+            <a href="https://ijcai-24.org/" class="resource-link" target="_blank">
+              IJCAI
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="note">
+        <strong>💡 Pro Tip:</strong> Most conferences publish accepted papers 2-3 months before the event. Check for "Accepted Papers" or "Proceedings" sections to read cutting-edge research early.
+      </div>
+    </section>
+
+    <!-- RESEARCH TOOLS -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">🛠️</span>
+        <h2>Research Tools</h2>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 class="card-title">🔍 Paper Discovery</h3>
+          <p class="card-desc">Find related papers and explore research</p>
+          <div class="link-group">
+            <a href="https://www.connectedpapers.com/" class="resource-link" target="_blank">
+              Connected Papers
+            </a>
+            <a href="https://www.semanticscholar.org/" class="resource-link" target="_blank">
+              Semantic Scholar
+            </a>
+            <a href="https://arxiv-sanity-lite.com/" class="resource-link" target="_blank">
+              Arxiv Sanity
+            </a>
+            <a href="https://scholar.google.com/" class="resource-link" target="_blank">
+              Google Scholar
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">📰 News & Updates</h3>
+          <p class="card-desc">Stay updated with curated AI news</p>
+          <div class="link-group">
+            <a href="https://www.deeplearning.ai/the-batch/" class="resource-link" target="_blank">
+              The Batch
+            </a>
+            <a href="https://importai.com/" class="resource-link" target="_blank">
+              Import AI
+            </a>
+            <a href="https://buttondown.email/ainews" class="resource-link" target="_blank">
+              AI News
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">💬 Communities</h3>
+          <p class="card-desc">Discuss research with the community</p>
+          <div class="link-group">
+            <a href="https://www.reddit.com/r/MachineLearning/" class="resource-link" target="_blank">
+              r/MachineLearning
+            </a>
+            <a href="https://www.reddit.com/r/LocalLLaMA/" class="resource-link" target="_blank">
+              r/LocalLLaMA
+            </a>
+            <a href="https://news.ycombinator.com/" class="resource-link" target="_blank">
+              Hacker News
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACADEMIC LABS -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">🎓</span>
+        <h2>Academic Labs</h2>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 class="card-title">Stanford AI Lab</h3>
+          <div class="link-group">
+            <a href="https://ai.stanford.edu/" class="resource-link" target="_blank">
+              Homepage
+            </a>
+            <a href="https://ai.stanford.edu/blog/" class="resource-link" target="_blank">
+              Research Blog
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">MIT CSAIL</h3>
+          <div class="link-group">
+            <a href="https://www.csail.mit.edu/" class="resource-link" target="_blank">
+              Homepage
+            </a>
+            <a href="https://www.csail.mit.edu/news" class="resource-link" target="_blank">
+              Latest News
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Berkeley AI Research</h3>
+          <div class="link-group">
+            <a href="https://bair.berkeley.edu/" class="resource-link" target="_blank">
+              Homepage
+            </a>
+            <a href="https://bair.berkeley.edu/blog/" class="resource-link" target="_blank">
+              Research Blog
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">CMU AI</h3>
+          <div class="link-group">
+            <a href="https://www.cs.cmu.edu/" class="resource-link" target="_blank">
+              CS Department
+            </a>
+            <a href="https://www.cs.cmu.edu/news" class="resource-link" target="_blank">
+              News
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPECIALIZED AREAS -->
+    <section class="section">
+      <div class="section-header">
+        <span class="icon">🔬</span>
+        <h2>Specialized Areas</h2>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 class="card-title">🏥 AI in Healthcare</h3>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/eess.IV/recent" class="resource-link" target="_blank">
+              Medical Imaging
+            </a>
+            <a href="https://arxiv.org/list/q-bio.QM/recent" class="resource-link" target="_blank">
+              Quantitative Biology
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🎵 Audio & Speech</h3>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/eess.AS/recent" class="resource-link" target="_blank">
+              Audio Processing
+            </a>
+            <a href="https://arxiv.org/list/cs.SD/recent" class="resource-link" target="_blank">
+              Sound (cs.SD)
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🔐 AI Safety</h3>
+          <div class="link-group">
+            <a href="https://www.alignmentforum.org/" class="resource-link" target="_blank">
+              Alignment Forum
+            </a>
+            <a href="https://www.lesswrong.com/" class="resource-link" target="_blank">
+              LessWrong
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">📊 Theory & Stats</h3>
+          <div class="link-group">
+            <a href="https://arxiv.org/list/stat.ML/recent" class="resource-link" target="_blank">
+              Statistics & ML
+            </a>
+            <a href="https://arxiv.org/list/cs.IT/recent" class="resource-link" target="_blank">
+              Information Theory
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    const html = document.documentElement;
+    
+    // Check for saved theme preference or default to light
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', currentTheme);
+    updateThemeButton(currentTheme);
+    
+    themeToggle.addEventListener('click', () => {
+      const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeButton(newTheme);
+    });
+    
+    function updateThemeButton(theme) {
+      if (theme === 'dark') {
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light Mode';
+      } else {
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark Mode';
+      }
+    }
+    
+    // Progress Bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+    });
+    
+    // Link Click Animation
+    document.querySelectorAll('a[target="_blank"]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        this.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 150);
+      });
+    });
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
